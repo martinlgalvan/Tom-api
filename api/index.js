@@ -1,8 +1,8 @@
 import express from 'express'
 import cors from 'cors'
-import WeekApiRoute from './api/routes/week.api.routes.js'
-import UsersApiRoute from './api/routes/users.api.routes.js'
-import ExercisesApiRoute from './api/routes/exercises.api.routes.js'
+import WeekApiRoute from './routes/week.api.routes.js'
+import UsersApiRoute from './routes/users.api.routes.js'
+import ExercisesApiRoute from './routes/exercises.api.routes.js'
 
 
 
