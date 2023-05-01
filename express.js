@@ -10,7 +10,6 @@ const app = express()
 app.use(express.urlencoded({ extended: true}))
 app.use(express.json())
 app.use(cors())
-app.options('*', function (req,res) { res.sendStatus(200); });
 
 app.use(express.static('public'))
 app.use('/', UsersApiRoute)
