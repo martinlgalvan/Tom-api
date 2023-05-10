@@ -270,7 +270,7 @@ async function createExercise(req, res){
 
 }
 
-async function createAmrap(req, res){
+async function createCircuit(req, res){
     const week_id = req.params.week_id
     const day_id = req.params.day_id
 
@@ -280,16 +280,16 @@ async function createAmrap(req, res){
                 let indexDay = days.findIndex(dia => dia._id == day_id)
                 let ultimoIndex = days[indexDay].exercises.length + 1
                 
-                let amrap = {}
+                let circuit = {}
 
                 if(req.body){
         
-                    amrap = req.body
-                    amrap.numberExercise = ultimoIndex
-                    amrap.valueExercise = ultimoIndex
+                    circuit = req.body
+                    circuit.numberExercise = ultimoIndex
+                    circuit.valueExercise = ultimoIndex
                 } 
 
-                RoutineServices.createExercise(week_id,day_id, amrap)
+                RoutineServices.createExercise(week_id,day_id, circuit)
                     .then(data => {
                         res.status(201).json(data)
                     })
@@ -359,7 +359,7 @@ function editById(req, res){
 
 }
 
-function editExerciseInAmrap(req, res){
+function editExerciseInCircuit(req, res){
     
     const week_id = req.params.week_id
     const day_id = req.params.day_id
@@ -529,8 +529,8 @@ export {
 
     findExercises,
     createExercise,
-    createAmrap,
-    editExerciseInAmrap,
+    createCircuit,
+    editExerciseInCircuit,
     editById,
     deleteExercise,
 
