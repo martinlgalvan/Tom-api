@@ -6,7 +6,7 @@ import {isLogin, isAdmin} from '../middleware/auth.middleware.js'
 const router = express.Router()
 
 
-//  Exercise part
+//  Ejercicio
 router.route('/api/week/:week_id/day/:day_id/exercise/:exercise_id')
     .put([isLogin, isAdmin],RoutineController.editById)
     .delete([isLogin,isAdmin], RoutineController.deleteExercise)
