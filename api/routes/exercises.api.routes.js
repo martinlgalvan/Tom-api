@@ -15,11 +15,11 @@ router.route('/api/week/:week_id/day/:day_id/exercises')
     .post([isLogin,isAdmin],RoutineController.createExercise)
 
 router.route('/api/week/:week_id/day/:day_id/exercises/amrap')
-    .post([isLogin,isAdmin],RoutineController.createAmrap)
+    .post([isLogin,isAdmin],RoutineController.createCircuit)
 
 
 router.route('/api/week/:week_id/day/:day_id/exercise/:exercise_id/amrap')
-    .put([isLogin,isAdmin],RoutineController.editExerciseInAmrap)
+    .put([isLogin,isAdmin],RoutineController.editExerciseInCircuit)
     //.delete([isLogin,isAdmin], RoutineController.deleteExercise)
 
 //Warmup part
