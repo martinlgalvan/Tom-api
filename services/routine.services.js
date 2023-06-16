@@ -1,4 +1,6 @@
 import { MongoClient, ObjectId } from 'mongodb'
+import {getDate} from './../date/formatedDate.js'
+import { get } from 'https'
 
 const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/')
 const db = client.db('TOM')
@@ -57,7 +59,8 @@ async function deleteDay(week_id, day_id ){
 async function createWeek(week,user_id){
     const newWeek = {
         ...week,
-        user_id: new ObjectId(user_id)
+        user_id: new ObjectId(user_id),
+        created_at: getDate()
     }
 
     return client.connect()

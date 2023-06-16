@@ -5,24 +5,53 @@ const db = client.db('TOM')
 const exercises = db.collection('ListExercises')
 
 
-async function getListExercises(){
+async function getListExercises(id){
+
 
     return client.connect()
         .then(async function () {
-            return exercises.find().toArray()
+            return exercises.find({ user_id: new ObjectId(id) }).toArray()
         })
 }
 
 
-async function newExercise(exercise){
+
+async function createExercise(exercise,user_id){
+    const Newexercise = {
+        ...exercise,
+        user_id: new ObjectId(user_id)
+    }
 
     return client.connect()
         .then(function(){
-            return exercises.insertOne(exercise)
+            return exercises.insertOne(Newexercise)
+        })
+        .then(function (){
+            return Newexercise
         })
 }
 
+async function editExercise(exercise_id, exercise){
+    
+    return client.connect()
+        .then(function(){
+            return exercises.updateOne(
+                { _id: new ObjectId(exercise_id)},
+                { $set: exercise }
+             )
+        })
+}
+
+async function deleteExercise(id){
+    return client.connect()
+        .then(function(){
+            return exercises.deleteOne({ _id: new ObjectId(id) })
+        })
+}   
+
 export {
     getListExercises,
-    newExercise
+    createExercise,
+    editExercise,
+    deleteExercise
 }
