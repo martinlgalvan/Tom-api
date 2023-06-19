@@ -30,13 +30,15 @@ async function getRoutineById(id){
         })
 }
 
-async function getRoutineByUserId(id){
+async function getRoutineByUserId(id) {
     return client.connect()
-        .then(function(){
-            return routine.find({ user_id: new ObjectId(id) }).toArray()
-
-        })
-}
+      .then(function() {
+        return routine.find({ user_id: new ObjectId(id) })
+          .sort({ created_at: -1 })
+          .toArray();
+      });
+  } // cuando se crean muchas tienen la misma hora, capaz se soluciona poniendo segundos a la formatedDate
+  
 
 async function createDay(day, weekId){
 

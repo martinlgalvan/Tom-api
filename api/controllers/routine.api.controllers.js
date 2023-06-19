@@ -379,9 +379,14 @@ function editExerciseInCircuit(req, res){
         exercise.circuit = req.body.circuit
     } 
 
+    if(req.body.notas){
+        exercise.notas = req.body.notas
+    } 
+
     if(req.body.numberExercise){
         exercise.numberExercise = req.body.numberExercise
     } 
+    
 
     if(req.body.valueExercise){
         exercise.valueExercise = req.body.valueExercise

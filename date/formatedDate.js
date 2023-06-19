@@ -15,9 +15,14 @@ export function getDate() {
   // Asegurarse de que los minutos tengan dos dígitos
   minutos = minutos < 10 ? '0' + minutos : minutos;
   
+  var segundos = fecha.getSeconds();
+  
+  // Asegurarse de que los segundos tengan dos dígitos
+  segundos = segundos < 10 ? '0' + segundos : segundos;
+  
   var fechaFormateada = {
     fecha: dia + '/' + mes + '/' + año,
-    hora: hora + ':' + minutos
+    hora: hora + ':' + minutos + ':' + segundos + `${hora < 12 ? ' AM' : ' PM'}`
   };
   
   return fechaFormateada;
