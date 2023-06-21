@@ -1,6 +1,5 @@
 import { MongoClient, ObjectId } from 'mongodb'
 import {getDate} from './../date/formatedDate.js'
-import { get } from 'https'
 
 const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/')
 const db = client.db('TOM')
