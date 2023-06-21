@@ -2,7 +2,7 @@ export function getDate() {
   var fecha = new Date();
   
   var dia = fecha.getDate();
-  var mes = fecha.getMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
+  var mes = fecha.getMonth() + 1;
   var año = fecha.getFullYear();
   
   // Asegurarse de que el día y el mes tengan dos dígitos
@@ -20,9 +20,18 @@ export function getDate() {
   // Asegurarse de que los segundos tengan dos dígitos
   segundos = segundos < 10 ? '0' + segundos : segundos;
   
+  var opciones = { 
+    hour: 'numeric', 
+    minute: 'numeric', 
+    second: 'numeric',
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // Obtener la zona horaria del usuario
+  };
+  
+  var horaFormateada = fecha.toLocaleTimeString([], opciones);
+  
   var fechaFormateada = {
     fecha: dia + '/' + mes + '/' + año,
-    hora: hora + ':' + minutos + ':' + segundos + `${hora < 12 ? ' AM' : ' PM'}`
+    hora: horaFormateada
   };
   
   return fechaFormateada;
