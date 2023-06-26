@@ -11,6 +11,11 @@ router.route('/api/week/:week_id/day/:day_id/exercise/:exercise_id')
     .put([isLogin, isAdmin],RoutineController.editById)
     .delete([isLogin,isAdmin], RoutineController.deleteExercise)
 
+router.route('/api/week/:week_id/exercise/:exercise_id')
+    .get([isLogin, isAdmin],RoutineController.findExercises)
+
+
+
 router.route('/api/week/:week_id/day/:day_id/exercises')
     .post([isLogin,isAdmin],RoutineController.createExercise)
 
