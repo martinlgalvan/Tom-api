@@ -36,7 +36,7 @@ async function getRoutineByUserId(id) {
           .sort({ created_at: -1 })
           .toArray();
       });
-  } // cuando se crean muchas tienen la misma hora, capaz se soluciona poniendo segundos a la formatedDate
+  } 
   
 
 async function createDay(day, weekId){
