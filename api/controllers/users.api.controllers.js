@@ -119,35 +119,7 @@ function removeUser(req, res) {
 
 
 
-/* Function q trae los 2
 
-
-async function getUsersByEntrenador(req, res) {
-    const filter = {}
-    const entrenador_id = req.params.idEntrenador
-
-
-    try {
-        const users = await UsersService.getUsersByEntrenadorId(entrenador_id);
-    
-        if (users) {
-          const usersWithRoutines = [];
-    
-          for (const user of users) {
-            const routine = await RoutineService.getRoutineByUserId(user._id);
-            usersWithRoutines.push({ user, routine });
-          }
-    
-          res.status(200).json(usersWithRoutines);
-        } else {
-          res.status(404).json({ message: "No es posible realizar esta acción." });
-        }
-      } catch (error) {
-        console.error('Error al obtener los usuarios y sus rutinas:', error);
-        res.status(500).json({ error: 'Ocurrió un error al obtener los usuarios y sus rutinas.' });
-      }
-    }
-*/
 
 
 export {
