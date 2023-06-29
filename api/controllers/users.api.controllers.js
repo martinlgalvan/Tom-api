@@ -83,7 +83,7 @@ async function getUsersByEntrenador(req, res) {
     
           for (const user of users) {
             const routine = await RoutineService.getRoutineByUserId(user._id);
-            usersWithRoutines.push({ user, routines });
+            usersWithRoutines.push({ user, routine });
           }
     
           res.status(200).json(usersWithRoutines);
