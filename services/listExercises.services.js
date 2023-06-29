@@ -4,7 +4,7 @@ const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203
 const db = client.db('TOM')
 const exercises = db.collection('ListExercises')
 
-
+//a
 async function getListExercises(id){
 
 
