@@ -1,33 +1,56 @@
 import { MongoClient, ObjectId } from 'mongodb'
 
-const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/')
-const db = client.db('TOM')
-const tokens = db.collection('Tokens')
+const urlPrimary = 'mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/'
+const urlSecondary = 'mongodb://127.0.0.1:27017/'
+let client = null
+let db = null
+let tokens = null
+
+async function connectToDatabase() {
+  try {
+    client = new MongoClient(urlPrimary)
+    await client.connect()
+    console.log('Conectado a la base de datos primaria.')
+  } catch (error) {
+    console.log('Error al conectar a la base de datos primaria:', error)
+    console.log('Intentando conectar a la base de datos secundaria...')
+    client = new MongoClient(urlSecondary)
+    await client.connect()
+    console.log('Conectado a la base de datos secundaria.')
+  }
+
+  db = client.db('TOM')
+  tokens = db.collection('Tokens')
+}
 
 async function create(token) {
-    await client.connect()
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    await tokens.insertOne(token)
+  await tokens.insertOne(token)
 }
-
 
 async function findByToken(token) {
-    await client.connect()
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    const tokenFound = await tokens.findOne({ token })
+  const tokenFound = await tokens.findOne({ token })
 
-    return tokenFound
+  return tokenFound
 }
 
-
 async function deleteByToken(token) {
-    await client.connect()
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    await tokens.deleteOne({ token })
+  await tokens.deleteOne({ token })
 }
 
 export {
-    create,
-    findByToken,
-    deleteByToken
+  create,
+  findByToken,
+  deleteByToken
 }

@@ -1,91 +1,117 @@
 import { MongoClient, ObjectId } from 'mongodb'
 import bcrypt from 'bcrypt'
 
-const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/')
-const db = client.db('TOM')
-const users = db.collection('Users')
+const urlPrimary = 'mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/'
+const urlSecondary = 'mongodb://127.0.0.1:27017/'
+let client = null
+let db = null
+let users = null
+
+async function connectToDatabase() {
+  try {
+    // Intenta conectar con la primera opción
+    client = new MongoClient(urlPrimary)
+    await client.connect()
+    console.log('Conectado a la base de datos primaria.')
+  } catch (error) {
+    console.log('Error al conectar a la base de datos primaria:')
+    console.log('Intentando conectar a la base de datos secundaria...')
+    // Si la conexión con la primera opción falla, intenta con la segunda opción
+    client = new MongoClient(urlSecondary)
+    await client.connect()
+    console.log('Conectado a la base de datos secundaria.')
+  }
+
+  db = client.db('TOM')
+  users = db.collection('Users')
+}
 
 async function findById(id) {
-    await client.connect()
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    const user = await users.findOne({ _id: ObjectId(id) })
+  const user = await users.findOne({ _id: ObjectId(id) })
 
-    return user
+  return user
 }
 
-async function getUsersByEntrenadorId(entrenador_id){
+async function getUsersByEntrenadorId(entrenador_id) {
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    return client.connect()
-        .then(async function () {
-            return users.find({ entrenador_id: new ObjectId(entrenador_id) }).toArray()
-        })
+  return users.find({ entrenador_id: new ObjectId(entrenador_id) }).toArray()
 }
-
 
 async function login(userLogin) {
-    await client.connect()
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    const user = await users.findOne({ email: userLogin.email })
+  const user = await users.findOne({ email: userLogin.email })
 
-    if (!user) {
-        throw new Error('No existe el usuario')
-    }
+  if (!user) {
+    throw new Error('No existe el usuario')
+  }
 
-    const isMatch = await bcrypt.compare(userLogin.password, user.password)
+  const isMatch = await bcrypt.compare(userLogin.password, user.password)
 
-    if (!isMatch) {
-        throw new Error('Contraseña incorrecta')
-    }
+  if (!isMatch) {
+    throw new Error('Contraseña incorrecta')
+  }
 
-    return user
-
+  return user
 }
-
 
 async function find(filter) {
-    await client.connect()
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    const usersCollection = await users.find(filter).toArray()
+  const usersCollection = await users.find(filter).toArray()
 
-    return usersCollection
+  return usersCollection
 }
 
-async function create(user,entrenador_id,logo) {
-    const newUser = { 
-        ...user,
-        entrenador_id: new ObjectId(entrenador_id),
-        logo: logo}
+async function create(user, entrenador_id, logo) {
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    await client.connect()
+  const newUser = {
+    ...user,
+    entrenador_id: new ObjectId(entrenador_id),
+    logo: logo,
+  }
 
-    const userExist = await users.findOne({ email: newUser.email })
+  const userExist = await users.findOne({ email: newUser.email })
 
-    if (userExist) {
-        throw new Error('El email ya existe')
-    }
+  if (userExist) {
+    throw new Error('El email ya existe')
+  }
 
-    const salt = await bcrypt.genSalt(10)
+  const salt = await bcrypt.genSalt(10)
+  newUser.password = await bcrypt.hash(newUser.password, salt)
 
-    newUser.password = await bcrypt.hash(newUser.password, salt)
+  await users.insertOne(newUser)
 
-    await users.insertOne(newUser)
-
-    return newUser
+  return newUser
 }
 
 async function remove(id) {
-    await client.connect()
+  if (!client) {
+    await connectToDatabase()
+  }
 
-    await users.deleteOne({ _id: ObjectId(id) })
+  await users.deleteOne({ _id: ObjectId(id) })
 }
 
 export {
-    getUsersByEntrenadorId,
-    find,
-    create,
-    remove,
-    login,
-    findById
-
+  getUsersByEntrenadorId,
+  find,
+  create,
+  remove,
+  login,
+  findById
 }
-
