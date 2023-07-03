@@ -2,7 +2,7 @@ import { MongoClient, ObjectId } from 'mongodb'
 import bcrypt from 'bcrypt'
 
 const urlPrimary = 'mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/'
-const urlSecondary = 'mongodb://127.0.0.1:27017/'
+const urlSecondary = 'mongodb://martinlgalvan:sssOnenote11@168.197.48.203:27017/'
 let client = null
 let db = null
 let users = null
