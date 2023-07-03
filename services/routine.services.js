@@ -48,13 +48,15 @@ async function getRoutineById(id) {
 }
 
 async function getRoutineByUserId(id) {
+  
+  console.log(getDate())
   if (!client) {
     await connectToDatabase()
   }
 
   return routine
     .find({ user_id: new ObjectId(id) })
-    .sort({ created_at: -1 })
+    .sort({ "created_at.fecha": -1 })
     .toArray()
 }
 
