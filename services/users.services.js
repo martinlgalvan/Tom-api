@@ -17,7 +17,7 @@ async function getUsersByEntrenadorId(entrenador_id){
 
     return client.connect()
         .then(async function () {
-            return users.find({ entrenador_id: new ObjectId(entrenador_id) }).toArray()
+            return users.find({ entrenador_id: new ObjectId(entrenador_id) }, { projection: { password: 0 } }).toArray();
         })
 }
 

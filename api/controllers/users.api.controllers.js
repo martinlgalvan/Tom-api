@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import * as UsersService from '../../services/users.services.js'
+import * as RoutineServices from '../../services/routine.services.js'
 import * as TokenService from '../../services/token.services.js'
 
 //----------------------------------------------------*
@@ -68,21 +69,36 @@ function find(req, res) {
             res.json(users)
         })
 }
-
 function getUsersByEntrenador(req, res) {
-    const filter = {}
-    const entrenador_id = req.params.idEntrenador
+    const filter = {};
+    const entrenador_id = req.params.idEntrenador;
 
     UsersService.getUsersByEntrenadorId(entrenador_id)
-    .then(function(user){
-        if(user){
-            res.status(200).json(user)
-        } else{
-            res.status(404).json({message: "No es posible realizar esta acción."})
-        }
-    })
-   
+        .then(function(users) {
+            if (users) {
+                 const  userPromises =  users.map(user => {
+                    console.log(user)
+                    return RoutineServices.getRoutineByUserId(user._id)
+                        .then(function(routine) {
+                            console.log(routine)
+                            user.rutina = routine;
+                            return user;
+                        });
+                });
+
+                Promise.all(userPromises)
+                    .then(function(usersWithRoutines) {
+                        res.status(200).json(usersWithRoutines);
+                    })
+                    .catch(function(error) {
+                        res.status(500).json({ message: "Error al obtener las rutinas de los usuarios." });
+                    });
+            } else {
+                res.status(404).json({ message: "No es posible realizar esta acción." });
+            }
+        });
 }
+
 
 function create(req, res) {
     const entrenador_id = req.params.idEntrenador
