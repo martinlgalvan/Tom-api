@@ -1,9 +1,6 @@
 export function getDate() {
   var fecha = new Date();
   
-  // Ajustar la fecha para UTC-3
-  fecha.setUTCHours(fecha.getUTCHours() - 3);
-  
   var dia = fecha.getUTCDate();
   var mes = fecha.getUTCMonth() + 1; // Los meses comienzan en 0, por lo que se suma 1
   var año = fecha.getUTCFullYear();
@@ -12,7 +9,11 @@ export function getDate() {
   dia = dia.toString().padStart(2, '0');
   mes = mes.toString().padStart(2, '0');
   
-  var hora = fecha.getUTCHours();
+  var hora = fecha.getUTCHours() - 3; // Restar 3 horas para obtener la hora en GMT-3
+  
+  // Asegurarse de que la hora esté dentro del rango de 0 a 23
+  hora = hora < 0 ? 24 + hora : hora;
+  
   var minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
   var segundos = fecha.getUTCSeconds().toString().padStart(2, '0');
   
@@ -27,5 +28,4 @@ export function getDate() {
   
   return fechaFormateada;
 }
-
 

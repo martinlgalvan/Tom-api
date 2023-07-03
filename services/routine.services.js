@@ -1,319 +1,251 @@
 import { MongoClient, ObjectId } from 'mongodb'
-import { getDate } from './../date/formatedDate.js'
+import {getDate} from './../date/formatedDate.js'
 
-let client = null
-let db = null
-let routine = null
+const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/')
+const db = client.db('TOM')
+const routine = db.collection('Routine')
 
-const urlPrimary = 'mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/'
-const urlSecondary = 'mongodb://martinlgalvan:sssOnenote11@168.197.48.203:27017/'
+async function getRoutine(filter){
+    const filterQuery = {
+        ...filter
+    }
 
-async function connectToDatabase() {
-  try {
-    client = new MongoClient(urlPrimary)
-    await client.connect()
-    console.log('Conectado a la base de datos primaria.')
-  } catch (error) {
-    console.log('Error al conectar a la base de datos primaria:', error)
-    console.log('Intentando conectar a la base de datos secundaria...')
-    client = new MongoClient(urlSecondary)
-    await client.connect()
-    console.log('Conectado a la base de datos secundaria.')
-  }
+    if(filterQuery.rutina) {
+        filterQuery.rutina = { $regex: filterQuery.rutina}
+    }
 
-  db = client.db('TOM')
-  routine = db.collection('Routine')
+
+    return client.connect()
+        .then(async function () {
+            return routine.find(filterQuery).toArray()
+        })
 }
 
-async function getRoutine(filter) {
-  if (!client) {
-    await connectToDatabase()
-  }
+async function getRoutineById(id){
+    return client.connect()
+        .then(function(){
+            return routine.find({ _id: new ObjectId(id) }).toArray()
 
-  const filterQuery = { ...filter }
-
-  if (filterQuery.rutina) {
-    filterQuery.rutina = { $regex: filterQuery.rutina }
-  }
-
-  return routine.find(filterQuery).toArray()
-}
-
-async function getRoutineById(id) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  return routine.find({ _id: new ObjectId(id) }).toArray()
+        })
 }
 
 async function getRoutineByUserId(id) {
+    return client.connect()
+      .then(function() {
+        return routine.find({ user_id: new ObjectId(id) })
+          .sort({ created_at: -1 })
+          .toArray();
+      });
+  } 
   
-  console.log(getDate())
-  if (!client) {
-    await connectToDatabase()
-  }
 
-  return routine
-    .find({ user_id: new ObjectId(id) })
-    .sort({ "created_at.fecha": -1 })
-    .toArray()
-}
+async function createDay(day, weekId){
 
-async function createDay(day, weekId) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  return routine.updateOne(
-    { _id: new ObjectId(weekId) },
-    { $push: { routine: day } }
-  )
-}
-
-async function deleteDay(week_id, day_id) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  return routine.updateOne(
-    { _id: new ObjectId(week_id), 'routine._id': new ObjectId(day_id) },
-    { $pull: { routine: { _id: new ObjectId(day_id) } } }
-  )
-}
-
-async function createWeek(week, user_id) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  const newWeek = {
-    ...week,
-    user_id: new ObjectId(user_id),
-    created_at: getDate(),
-  }
-
-  await routine.insertOne(newWeek)
-
-  return newWeek
-}
-
-async function deleteWeek(weekId) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  return routine.deleteOne({ _id: new ObjectId(weekId) })
-}
-
-async function editWeek(weekID, week) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  return routine.updateOne({ _id: new ObjectId(weekID) }, { $set: week })
-}
-
-async function editDay(week_id, day_id, day) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  return routine.updateOne(
-    { 'routine._id': new ObjectId(day_id) },
-    { $set: { 'routine.$.name': day } }
-  )
-}
-
-async function findExercises(week_id, exercise_id) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  return routine.findOne({
-    _id: new ObjectId(week_id),
-    'routine.exercises.exercise_id': new ObjectId(exercise_id),
-  })
-}
-
-async function createExercise(week_id, day_id, exercise, id) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  const newExercise = {
-    ...exercise,
-    exercise_id: new ObjectId(id),
-  }
-
-  return routine.updateOne(
-    {
-      _id: new ObjectId(week_id),
-      $or: [{ 'routine._id': day_id }, { 'routine._id': new ObjectId(day_id) }],
-    },
-    { $push: { 'routine.$[element].exercises': newExercise } },
-    { arrayFilters: [{ $or: [{ 'element._id': day_id }, { 'element._id': new ObjectId(day_id) }] }] }
-  )
-}
-
-async function editExercise(week_id, day_id, exercise_id, exercise) {
-  if (!client) {
-    await connectToDatabase()
-  }
-
-  const newExercise = {
-    ...exercise,
-    exercise_id: new ObjectId(exercise_id),
-  }
-
-  return routine.updateOne(
-    {
-      _id: new ObjectId(week_id),
-      'routine.exercises.exercise_id': new ObjectId(exercise_id),
-    },
-    { $set: { 'routine.$[day].exercises.$[element]': newExercise } },
-    {
-      arrayFilters: [
-        { 'day._id': new ObjectId(day_id) },
-        { 'element.exercise_id': new ObjectId(exercise_id) },
-      ],
+    return client.connect()
+        .then(function (galeriaServ){
+            return routine.updateOne({ _id: new ObjectId(weekId) }, { $push: {routine: day}})
+        })
+                
     }
-  )
-}
 
-async function editExerciseInAmrap(week_id, day_id, exercise_id, exercise) {
-  if (!client) {
-    await connectToDatabase()
-  }
+async function deleteDay(week_id, day_id ){
+        return client.connect()
+            .then(function(){
+                return routine.updateOne({ _id: new ObjectId(week_id), "routine._id": new ObjectId(day_id) },
+                { $pull: { "routine": {_id : new ObjectId(day_id) } }})
+            })
+    }    
 
-  const newExercise = {
-    ...exercise,
-    exercise_id: new ObjectId(exercise_id),
-  }
 
-  return routine.updateOne(
-    {
-      _id: new ObjectId(week_id),
-      'routine.exercises.exercise_id': new ObjectId(exercise_id),
-    },
-    { $set: { 'routine.$[day].exercises.$[element]': newExercise } },
-    {
-      arrayFilters: [
-        { 'day._id': new ObjectId(day_id) },
-        { 'element.exercise_id': new ObjectId(exercise_id) },
-      ],
+async function createWeek(week,user_id){
+    const newWeek = {
+        ...week,
+        user_id: new ObjectId(user_id),
+        created_at: getDate()
     }
-  )
+
+    return client.connect()
+        .then(function(){
+            return routine.insertOne(newWeek)
+        })
+        .then(function (){
+            return newWeek
+        })
 }
 
-async function deleteExercise(week_id, day_id, exercise_id) {
-  if (!client) {
-    await connectToDatabase()
-  }
 
-  return routine.updateOne(
-    { _id: new ObjectId(week_id) },
-    {
-      $pull: {
-        'routine.$[day].exercises': {
-          $or: [{ exercise_id: new ObjectId(exercise_id) }, { exercise_id: exercise_id }],
-        },
-      },
-    },
-    { arrayFilters: [{ $or: [{ 'day._id': day_id }, { 'day._id': new ObjectId(day_id) }] }] }
-  )
+async function deleteWeek(weekId){
+    return client.connect()
+        .then(function(){
+            return routine.deleteOne({ _id: new ObjectId(weekId) })
+        })
+}   
+
+async function editWeek(weekID, week){
+    
+    return client.connect()
+        .then(function(){
+            return routine.updateOne(
+                { _id: new ObjectId(weekID)},
+                { $set: week }
+             )
+        })
 }
+
+async function editDay(week_id, day_id, day){
+
+    return client.connect()
+        .then(function(){
+            return routine.updateOne(
+                { "routine._id": new ObjectId(day_id) },
+                { $set: {"routine.$.name" : day}  }
+             )
+        })
+}
+
+async function findExercises(week_id,exercise_id){
+    return client.connect()
+        .then(async function (){
+            return routine.findOne({  _id: new ObjectId(week_id), "routine.exercises.exercise_id": new ObjectId(exercise_id) })
+        }) 
+}
+
+async function createExercise(week_id, day_id, exercise, id ){
+
+    const newExercise = {
+        ...exercise,
+        exercise_id: new ObjectId(id)
+    }
+
+    return client.connect()
+        .then(function (galeriaServ){
+            return routine.updateOne({ _id: new ObjectId(week_id), $or: [{"routine._id": day_id}, {"routine._id": new ObjectId(day_id)}] },
+            { $push: { "routine.$[element].exercises" : newExercise } }, { arrayFilters: [ { $or: [{"element._id": day_id}, {"element._id": new ObjectId(day_id)}] } ] })
+        })  
+}
+
+
+async function editExercise(week_id,day_id, exercise_id, exercise){
+
+    const newExercise = {
+        ...exercise,
+        exercise_id: new ObjectId(exercise_id)
+    }
+
+    return client.connect()
+        .then(function(){
+            return routine.updateOne(
+                {  _id: new ObjectId(week_id), "routine.exercises.exercise_id": new ObjectId(exercise_id) },
+                { $set: { "routine.$[day].exercises.$[element]" : newExercise } }, { arrayFilters: [{"day._id": new ObjectId(day_id)} ,{"element.exercise_id": new ObjectId(exercise_id) }]})
+             
+        })
+}
+
+async function editExerciseInAmrap(week_id,day_id, exercise_id, exercise){
+
+    const newExercise = {
+        ...exercise,
+        exercise_id: new ObjectId(exercise_id)
+    }
+
+    return client.connect()
+        .then(function(){
+            return routine.updateOne(
+                {  _id: new ObjectId(week_id), "routine.exercises.exercise_id": new ObjectId(exercise_id) },
+                { $set: { "routine.$[day].exercises.$[element]" : newExercise } }, { arrayFilters: [{"day._id": new ObjectId(day_id)} ,{"element.exercise_id": new ObjectId(exercise_id) }]})
+             
+        })
+}
+
+
+async function deleteExercise(week_id,day_id, exercise_id){
+
+    return client.connect()
+        .then(function(){
+            return routine.updateOne({ _id: new ObjectId(week_id) },
+            { $pull: { "routine.$[day].exercises": { $or: [{exercise_id : new ObjectId(exercise_id)},{exercise_id : exercise_id} ]} }}, {arrayFilters: [{ $or: [{"day._id": day_id}, {"day._id": new ObjectId(day_id)}] }]})
+             
+        })
+}
+
+
+
+
 
 // BLOQUE DE MOVILIDAD / ENTRADA EN CALOR
 
-async function findWarmUp(week_id, warmup_id) {
-  if (!client) {
-    await connectToDatabase()
-  }
 
-  return routine.findOne({
-    _id: new ObjectId(week_id),
-    'routine.warmup.warmup_id': new ObjectId(warmup_id),
-  })
+async function findWarmUp(week_id,warmup_id){
+    return client.connect()
+        .then(async function (){
+            return routine.findOne({  _id: new ObjectId(week_id), "routine.warmup.warmup_id": new ObjectId(warmup_id) })
+        }) 
 }
 
-async function createWarmUp(week_id, day_id, warmup, id) {
-  if (!client) {
-    await connectToDatabase()
-  }
+async function createWarmUp(week_id, day_id, warmup, id ){
 
-  const warmUp = {
-    ...warmup,
-    warmup_id: new ObjectId(id),
-  }
+    const warmUp = {
+        ...warmup,
+        warmup_id: new ObjectId(id)
+    }
 
-  return routine.updateOne(
-    {
-      _id: new ObjectId(week_id),
-      $or: [{ 'routine._id': day_id }, { 'routine._id': new ObjectId(day_id) }],
-    },
-    { $push: { 'routine.$[element].warmup': warmUp } },
-    { arrayFilters: [{ $or: [{ 'element._id': day_id }, { 'element._id': new ObjectId(day_id) }] }] }
-  )
+    return client.connect()
+        .then(function (galeriaServ){
+            return routine.updateOne({ _id: new ObjectId(week_id), $or: [{"routine._id": day_id}, {"routine._id": new ObjectId(day_id)}] },
+            { $push: { "routine.$[element].warmup" : warmUp } }, { arrayFilters: [ { $or: [{"element._id": day_id}, {"element._id": new ObjectId(day_id)}] } ] })
+        })  
 }
 
-async function editWarmUp(week_id, day_id, warmup_id, warmup) {
-  if (!client) {
-    await connectToDatabase()
-  }
+async function editWarmUp(week_id,day_id, warmup_id, warmup){
 
-  const newWarmup = {
-    ...warmup,
-    warmup_id: new ObjectId(warmup_id),
-  }
+    const newWarmup = {
+        ...warmup,
+        warmup_id: new ObjectId(warmup_id)
+    }
 
-  return routine.updateOne(
-    {
-      _id: new ObjectId(week_id),
-      $or: [{ 'routine.warmup.warmup_id': warmup_id }, { 'routine.warmup.warmup_id': new ObjectId(warmup_id) }],
-    },
-    { $set: { 'routine.$[day].warmup.$[element]': newWarmup } },
-    { arrayFilters: [{ 'day._id': new ObjectId(day_id) }, { 'element.warmup_id': new ObjectId(warmup_id) }] }
-  )
+    return client.connect()
+        .then(function(){
+            return routine.updateOne(
+                {  _id: new ObjectId(week_id), $or: [{"routine.warmup.warmup_id": warmup_id}, {"routine.warmup.warmup_id": new ObjectId(warmup_id)}]  },
+                { $set: { "routine.$[day].warmup.$[element]" : newWarmup } }, { arrayFilters: [ {"day._id": new ObjectId(day_id)}, {"element.warmup_id": new ObjectId(warmup_id)} ] })
+             
+        })
 }
 
-async function deleteWarmup(week_id, day_id, warmup_id) {
-  if (!client) {
-    await connectToDatabase()
-  }
 
-  return routine.updateOne(
-    { _id: new ObjectId(week_id) },
-    {
-      $pull: {
-        'routine.$[day].warmup': { warmup_id: new ObjectId(warmup_id) },
-      },
-    },
-    { arrayFilters: [{ $or: [{ 'day._id': day_id }, { 'day._id': new ObjectId(day_id) }] }] }
-  )
+async function deleteWarmup(week_id,day_id, warmup_id){
+
+    return client.connect()
+        .then(function(){
+            return routine.updateOne({ _id: new ObjectId(week_id) },
+            { $pull: { "routine.$[day].warmup": {warmup_id : new ObjectId(warmup_id) } }}, {arrayFilters: [{ $or: [{"day._id": day_id}, {"day._id": new ObjectId(day_id)}] }]})
+             
+        })
 }
 
 export {
-  getRoutine,
-  getRoutineById,
-  getRoutineByUserId,
-  createWeek,
-  editWeek,
-  deleteWeek,
-  createDay,
-  deleteDay,
-  editDay,
-  createExercise,
-  editExercise,
-  editExerciseInAmrap,
-  deleteExercise,
-  findExercises,
-  findWarmUp,
-  createWarmUp,
-  editWarmUp,
-  deleteWarmup,
-}
+    getRoutine,
+    getRoutineById,
+    getRoutineByUserId,
+    createWeek,
+    editWeek,
+    deleteWeek,
+    createDay,
+    deleteDay,
+    editDay,
 
+    createExercise,
+    editExercise,
+    editExerciseInAmrap,
+    deleteExercise,
+    findExercises,
+
+    findWarmUp,
+    createWarmUp,
+    editWarmUp,
+    deleteWarmup
+
+}
 
 
 
