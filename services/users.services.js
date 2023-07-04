@@ -1,7 +1,9 @@
 import { MongoClient, ObjectId } from 'mongodb'
 import bcrypt from 'bcrypt'
 
-const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/')
+const options = { keepAlive: true };
+
+const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/',options)
 const db = client.db('TOM')
 const users = db.collection('Users')
 
