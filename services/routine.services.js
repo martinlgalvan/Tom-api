@@ -3,7 +3,7 @@ import {getDate} from './../date/formatedDate.js'
 
 const options = { keepAlive: true };
 
-const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/',options)
+const client = new MongoClient('mongodb://martin:Onenote11@191.96.31.180:27017/',options)
 const db = client.db('TOM')
 const routine = db.collection('Routine')
 
@@ -35,7 +35,7 @@ async function getRoutineByUserId(id) {
     return client.connect()
       .then(function() {
         return routine.find({ user_id: new ObjectId(id) })
-          .sort({ created_at: -1 })
+        .sort({ "created_at.fecha": -1, "created_at.hora": -1 })
           .toArray();
       });
   } 

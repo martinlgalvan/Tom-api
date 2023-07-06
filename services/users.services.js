@@ -1,7 +1,8 @@
 import { MongoClient, ObjectId } from 'mongodb'
+import {getDate} from './../date/formatedDate.js'
 import bcrypt from 'bcrypt'
 
-const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/')
+const client = new MongoClient('mongodb://martin:Onenote11@191.96.31.180:27017/')
 const db = client.db('TOM')
 const users = db.collection('Users')
 
@@ -13,13 +14,18 @@ async function findById(id) {
     return user
 }
 
-async function getUsersByEntrenadorId(entrenador_id){
-
+async function getUsersByEntrenadorId(entrenador_id) {
     return client.connect()
-        .then(async function () {
-            return users.find({ entrenador_id: new ObjectId(entrenador_id) }, { projection: { password: 0 } }).toArray();
-        })
-}
+      .then(async function () {
+        return users.find(
+          { entrenador_id: new ObjectId(entrenador_id) },
+          { projection: { password: 0 } }
+        )
+        .sort({ "created_at.fecha": -1, "created_at.hora": -1 })
+        .toArray();
+      });
+  }
+  
 
 
 async function login(userLogin) {
@@ -54,7 +60,8 @@ async function create(user,entrenador_id,logo) {
     const newUser = { 
         ...user,
         entrenador_id: new ObjectId(entrenador_id),
-        logo: logo}
+        logo: logo,
+        created_at: getDate()}
 
     await client.connect()
 
