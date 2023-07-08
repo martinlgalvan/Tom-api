@@ -2,16 +2,17 @@ import { MongoClient, ObjectId } from 'mongodb'
 
 const options = { keepAlive: true };
 
-const client = new MongoClient('mongodb://martin:Onenote11@191.96.31.180:27017/',options)
+const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/',options)
 const db = client.db('TOM')
-const exercises = db.collection('Exercise')
+const exercises = db.collection('Routine')
 
-async function findExercises(week_id,exercise_id){
+async function findExercises(week_id,day_id){
     return client.connect()
         .then(async function (){
-            return exercises.findOne({  _id: ObjectId(week_id), "routine.exercises.exercise_id": ObjectId(exercise_id) })
+            return routine.findOne({  _id: new ObjectId(week_id), "routine._id": new ObjectId(day_id) })
         }) 
 }
+
 
 async function createExercise(dayID, rutine, id){
 

@@ -3,7 +3,7 @@ import {getDate} from './../date/formatedDate.js'
 
 const options = { keepAlive: true };
 
-const client = new MongoClient('mongodb://martin:Onenote11@191.96.31.180:27017/',options)
+const client = new MongoClient('mongodb://martinlgalvan:Onenote11@168.197.48.203:27017/',options)
 const db = client.db('TOM')
 const routine = db.collection('Routine')
 
@@ -105,10 +105,10 @@ async function editDay(week_id, day_id, day){
         })
 }
 
-async function findExercises(week_id,exercise_id){
+async function findExercises(week_id,day_id){
     return client.connect()
         .then(async function (){
-            return routine.findOne({  _id: new ObjectId(week_id), "routine.exercises.exercise_id": new ObjectId(exercise_id) })
+            return routine.findOne({  _id: new ObjectId(week_id), "routine._id": new ObjectId(day_id) })
         }) 
 }
 
@@ -127,18 +127,13 @@ async function createExercise(week_id, day_id, exercise, id ){
 }
 
 
-async function editExercise(week_id,day_id, exercise_id, exercise){
-
-    const newExercise = {
-        ...exercise,
-        exercise_id: new ObjectId(exercise_id)
-    }
+async function editExercise(week_id,day_id, exercise){
 
     return client.connect()
         .then(function(){
             return routine.updateOne(
-                {  _id: new ObjectId(week_id), "routine.exercises.exercise_id": new ObjectId(exercise_id) },
-                { $set: { "routine.$[day].exercises.$[element]" : newExercise } }, { arrayFilters: [{"day._id": new ObjectId(day_id)} ,{"element.exercise_id": new ObjectId(exercise_id) }]})
+                {  _id: new ObjectId(week_id) },
+                { $set: { "routine.$[day].exercises" : exercise } }, { arrayFilters: [{"day._id": new ObjectId(day_id)}]})
              
         })
 }

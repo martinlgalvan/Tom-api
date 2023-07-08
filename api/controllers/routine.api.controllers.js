@@ -88,17 +88,6 @@ function createClonLastWeek(req, res){
         week.routine = req.body.routine
     } 
 
-    /*for (let i = 0; i < ultimoArr.routine.length; i++) {
-
-                        ultimoArr.routine[i]._id = new ObjectId()
-                        
-                        if(ultimoArr.routine[i].exercises != undefined){
-                        for (let j = 0; j < ultimoArr.routine[i].exercises.length; j++) {
-
-                            ultimoArr.routine[i].exercises[j].exercise_id = new ObjectId()
-                            
-                        }}
-                    }*/
 
     //Guardo el alumno
     RoutineServices.getRoutineByUserId(user_id) 
@@ -233,9 +222,9 @@ function deleteDay(req, res) {
 async function findExercises(req, res){
 
     const week_id = req.params.week_id
-    const exercise_id = req.params.exercise_id
+    const day_id = req.params.day_id
 
-    const exercise = await RoutineServices.findExercises(week_id,exercise_id)
+    const exercise = await RoutineServices.findExercises(week_id,day_id)
     res.status(200).json(exercise)
 }
 
@@ -243,6 +232,7 @@ async function createExercise(req, res){
     const week_id = req.params.week_id
     const day_id = req.params.day_id
 
+    // CORREGIR ESTO PARA AUMENTAR VELOCIDAD EN LAS CONSULTAS
     RoutineServices.getRoutineById(week_id)
         .then(data => {
                 let days = data[0].routine
@@ -305,50 +295,15 @@ function editById(req, res){
     
     const week_id = req.params.week_id
     const day_id = req.params.day_id
-    const exercise_id = req.params.exercise_id
 
-    const exercise = {}
+    const exercise = {
+        exercises: [{}]
+    }
+    if(req.body.exercises){
+        exercise.exercises = req.body.exercises
+    }
 
-    if(req.body.name){
-        exercise.name = req.body.name
-    } 
-
-    if(req.body.sets){
-        exercise.sets = req.body.sets
-    } 
-
-    if(req.body.reps){
-        exercise.reps = req.body.reps
-    } 
-
-    if(req.body.peso){
-        exercise.peso = req.body.peso
-    } 
-
-    if(req.body.video){
-        exercise.video = req.body.video
-    } 
-
-    if(req.body.notas){
-        exercise.notas = req.body.notas
-    } 
-
-    if(req.body.type){
-        exercise.type = req.body.type
-    } 
-
-    if(req.body.numberExercise){
-        exercise.numberExercise = req.body.numberExercise
-    } 
-
-    if(req.body.valueExercise){
-        exercise.valueExercise = req.body.valueExercise
-    } 
-
-    RoutineServices.editExercise(week_id, day_id, exercise_id, exercise)
-        .then(function(){
-            return RoutineServices.findExercises(week_id, exercise_id)
-        })
+    RoutineServices.editExercise(week_id, day_id, exercise)
         .then(function(exercise) {
             if(exercise){
                 res.status(200).json({exercise})
